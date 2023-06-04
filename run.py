@@ -1,7 +1,10 @@
 import argparse
+import os.path
+
 from Generator import CrfCaller
 from DataProcessor import DataProcessor
 from Evaluator import Evaluator
+from Segmentor import segment
 
 
 def run():
@@ -16,29 +19,37 @@ def run():
     parser.add_argument("--crf_test", type=str, default='.\\CRF_Tool\\crf_test')
     parser.add_argument("--train", default=False, action='store_true')
     parser.add_argument("--test", default=False, action='store_true')
+    parser.add_argument("--sentence", type=str, default="")
     args = parser.parse_args()
 
-    processor = DataProcessor(file='.\\data\\pku_training.utf8', args=args)
-    processor.write_train_file()
-    processor.write_test_file()
+    if not os.path.exists('.\\data\\processed\\train.txt') and not os.path.exists('.\\data\\processed\\test.txt'):
+        processor = DataProcessor(file='.\\data\\pku_training.utf8', args=args)
+        processor.write_train_file()
+        processor.write_test_file()
 
-    caller = CrfCaller(args)
-    caller.generate('.\\docs\\crf_pred.txt')
+    if args.train:
+        caller = CrfCaller(args)
+        caller.generate('.\\docs\\crf_pred.txt')
 
-    evaluator = Evaluator(".\\docs\\crf_pred.txt")
-    b_precision, i_precision = evaluator.get_precision()
-    b_recall, i_recall = evaluator.get_recall()
-    b_f1, i_f1 = evaluator.get_f1()
+    if args.test:
+        evaluator = Evaluator(".\\docs\\crf_pred.txt")
+        b_precision, i_precision = evaluator.get_precision()
+        b_recall, i_recall = evaluator.get_recall()
+        b_f1, i_f1 = evaluator.get_f1()
 
-    print("PRF Score When B-char is the Positive Label")
-    print(f'Precision: {b_precision}')
-    print(f'Recall: {b_recall}')
-    print(f'F-1: {b_f1}')
+        print("PRF Score When B-char is the Positive Label")
+        print(f'Precision: {b_precision}')
+        print(f'Recall: {b_recall}')
+        print(f'F-1: {b_f1}')
 
-    print("\nPRF Score When I-char is the Positive Label")
-    print(f'Precision: {i_precision}')
-    print(f'Recall: {i_recall}')
-    print(f'F-1: {i_f1}')
+        print("\nPRF Score When I-char is the Positive Label")
+        print(f'Precision: {i_precision}')
+        print(f'Recall: {i_recall}')
+        print(f'F-1: {i_f1}')
+
+    if args.sentence != "":
+        print(f"Original Sentence: {args.sentence}")
+        print(f"Segmentation Result: {segment(args.sentence, args)}")
 
 
 if __name__ == '__main__':
