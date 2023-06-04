@@ -21,6 +21,12 @@ python run.py --test
 to test the model with the test dataset, the result is saved
 in ./docs.
 
+Use command
+```shell
+python run.py --sentence=这句话将要被分词
+```
+to segment the input sentence.
+
 ## Program Structure
 - CRF_Tool: The CRF++ dependencies.
 - data: The directory that saves datasets.
